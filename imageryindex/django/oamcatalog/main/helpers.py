@@ -17,9 +17,11 @@ try:
 except ImportError:
     import simplejson as json
 
-from osgeo import gdal
-from PIL import Image as PILImage
-
+try:
+    from osgeo import gdal
+    from PIL import Image as PILImage
+except:
+    pass
 from django.http import HttpResponse
 from django.contrib.auth import authenticate, login
 
