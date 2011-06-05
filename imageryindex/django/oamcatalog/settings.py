@@ -88,7 +88,7 @@ INSTALLED_APPS = (
     'django.contrib.admin',
     'main',
     'django.contrib.gis',
-    'django.contrib.staticfiles',
+#    'django.contrib.staticfiles',
     'registration'
 )
 
@@ -108,4 +108,7 @@ AUTH_LDAP_SERVER_URI = "ldaps://ldap.osgeo.org"
 AUTH_LDAP_USER_DN_TEMPLATE = "uid=%(user)s,ou=People,dc=osgeo,dc=org"
 
 # OAM_THUMBNAIL_URL should accept two %s args; one for id, one for size.
+# This is not neccesary if you have gdal 1.8+ installed locally, but 
+# if it is, users will be redirected to this URL instead of using the
+# local thumbnailing code.
 OAM_THUMBNAIL_URL="http://www.pepperoni.dotcloud.com/?id=%s&size=%s"
