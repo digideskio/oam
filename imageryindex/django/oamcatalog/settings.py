@@ -103,3 +103,6 @@ AUTHENTICATION_BACKENDS = (
 )
 AUTH_LDAP_SERVER_URI = "ldaps://ldap.osgeo.org"
 AUTH_LDAP_USER_DN_TEMPLATE = "uid=%(user)s,ou=People,dc=osgeo,dc=org"
+
+# OAM_THUMBNAIL_URL should accept two %s args; one for id, one for size.
+OAM_THUMBNAIL_URL="http://www.pepperoni.dotcloud.com/?id=%s&size=%s"
