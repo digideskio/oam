@@ -10,8 +10,9 @@ from django.shortcuts import render_to_response, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
 from django.core.cache import cache
-
+from main.helpers import *
 from StringIO import StringIO
+from django.conf import settings
 
 @logged_in_or_basicauth()
 def image_layer(request, image=None, layer=None):
@@ -263,7 +264,6 @@ def layer_browse(request, id):
 
 def image_browse(request, id):
     i = Image.objects.get(pk=id)
-<<<<<<< HEAD
     next = Image.objects.filter(id__gt=id).order_by("id")
     if next.count(): next = next[0]
     else: next = None
@@ -274,12 +274,13 @@ def image_browse(request, id):
 
 def profile(request):
     return HttpResponseRedirect("/")
-=======
     return render_to_response("image.html", {'image': i})
 
 def image_preview(request, id, size):
     """
     """
+    if settings.OAM_THUMBNAIL_URL:
+        return HttpResponseRedirect(settings.OAM_THUMBNAIL_URL % (id, size))
     image = Image.objects.get(pk=id)
 
     key = image_cache_key(image, size)
@@ -295,4 +296,3 @@ def image_preview(request, id, size):
         cache.set(key, val, 86400)
     
     return HttpResponse(val, mimetype='image/jpeg')
->>>>>>> prettify

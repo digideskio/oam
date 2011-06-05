@@ -18,7 +18,7 @@ except ImportError:
     import simplejson as json
 
 from osgeo import gdal
-from PIL import Image
+from PIL import Image as PILImage
 
 from django.http import HttpResponse
 from django.contrib.auth import authenticate, login
@@ -321,8 +321,8 @@ def image_made_smaller(im, size):
         for (ov_width, ov_height, overview) in sorted(overviews):
             if ov_width > th_width:
                 data = overview.ReadRaster(0, 0, ov_width, ov_height)
-                chan = Image.fromstring('L', (ov_width, ov_height), data)
-                chan = chan.resize((th_width, th_height), Image.ANTIALIAS)
+                chan = PILImage.fromstring('L', (ov_width, ov_height), data)
+                chan = chan.resize((th_width, th_height), PILImage.ANTIALIAS)
 
                 chans.append(chan)
                 break
@@ -330,7 +330,7 @@ def image_made_smaller(im, size):
     #
     # Return an image
     #
-    thumb = Image.merge('RGB', chans)
+    thumb = PILImage.merge('RGB', chans)
 
     return thumb
 

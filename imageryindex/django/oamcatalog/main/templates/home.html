@@ -7,14 +7,14 @@ function start() { createMap("/api/image/?limit=100", document.getElementById("m
 {% endblock %}
 {% block onload %} onload="start();"{% endblock %}
 {% block content %}
-<div style="float: right; width: 200px;">
+<div id="map" style="width: 512px; height: 500px;"></div>
   <h3>Recently Uploaded Images</h3>
   <ul class="image-pile">
   {% for image in images %}
     <li class="{{image.columns}}">
-        <p>
+        <!--<p>
             <a href="/image/{{image.id}}/" style="width: {{image.thumb_size.0}}px; height:{{image.thumb_size.1}}px;"><img src="/image/{{image.id}}/thumbnail.jpg" width="{{image.thumb_size.0}}" height="{{image.thumb_size.1}}"></a>
-        </p>
+        </p>-->
         <p>
             <strong><a href="/image/{{image.id}}/">{{image.id}}</a></strong>,
             <a href="/license/{{image.image.license.id}}/">{{image.image.license.name}}</a>
@@ -28,5 +28,4 @@ function start() { createMap("/api/image/?limit=100", document.getElementById("m
   {% endfor %}
   </ul>
 </div>
-<div id="map" style="width: 512px; height: 500px;"></div>
 {% endblock %}  
