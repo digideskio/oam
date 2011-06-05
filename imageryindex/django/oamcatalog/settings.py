@@ -88,8 +88,11 @@ INSTALLED_APPS = (
     'django.contrib.admin',
     'main',
     'django.contrib.gis',
-    'registration',
+    'django.contrib.staticfiles',
+    'registration'
 )
+
+STATIC_URL = '/static/'
 
 ACCOUNT_ACTIVATION_DAYS = 7
 

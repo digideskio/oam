@@ -6,10 +6,19 @@ import traceback
 import base64
 from django.shortcuts import render_to_response, get_object_or_404
 
+from os import environ
+from urlparse import urlparse
+from os.path import basename
+from hashlib import md5
+from math import sqrt
+
 try:
     import json
 except ImportError:
     import simplejson as json
+
+from osgeo import gdal
+from PIL import Image
 
 from django.http import HttpResponse
 from django.contrib.auth import authenticate, login
@@ -260,3 +269,76 @@ def render(request, template, args=None):
         args['user'] = request.user
     
     return render_to_response(template, args)
+
+def image_size_small(im_width, im_height, size):
+    """ Determine a good thumbnail size based on desired named size.
+    """
+    aspect = float(im_width) / float(im_height)
+
+    if size == 'thumbnail':
+        if aspect > 1.6:
+            return 440, int(440 / aspect)
+        elif aspect < .3:
+            return 98, int(98 / aspect)
+        else:
+            return 196, int(196 / aspect)
+    
+    elif size == 'preview':
+        area = 320 * 320
+    elif size == 'large':
+        area = 640 * 640
+    else:
+        raise Exception('Don\'t know about "%s"' % size)
+    
+    th_height = int(sqrt(area / aspect))
+    th_width = int(aspect * th_height)
+    
+    return th_width, th_height
+
+def image_made_smaller(im, size):
+    """
+    """
+    environ['GDAL_DISABLE_READDIR_ON_OPEN'] = 'YES'
+    #environ['CPL_DEBUG'] = 'On'
+
+    ds = gdal.Open('/vsicurl/' + str(im.url))
+    th_width, th_height = image_size_small(ds.RasterXSize, ds.RasterYSize, size)
+    
+    #
+    # Extract the best-sized overview from the source image
+    #
+    interps = dict([(getattr(gdal, gci), gci[4:-4]) for gci in dir(gdal) if gci.startswith('GCI')])
+    bands = dict([(interps[ds.GetRasterBand(i).GetColorInterpretation()], ds.GetRasterBand(i)) for i in range(1, 1 + ds.RasterCount)])
+    chans = []
+    
+    for (chan, interp) in enumerate(('Red', 'Green', 'Blue')):
+        assert interp in bands, '%s missing from bands - bad news.' % interp
+
+        band = bands[interp]
+        overviews = [band.GetOverview(i) for i in range(band.GetOverviewCount())]
+        overviews = [(ov.XSize, ov.YSize, ov) for ov in overviews]
+        
+        for (ov_width, ov_height, overview) in sorted(overviews):
+            if ov_width > th_width:
+                data = overview.ReadRaster(0, 0, ov_width, ov_height)
+                chan = Image.fromstring('L', (ov_width, ov_height), data)
+                chan = chan.resize((th_width, th_height), Image.ANTIALIAS)
+
+                chans.append(chan)
+                break
+    
+    #
+    # Return an image
+    #
+    thumb = Image.merge('RGB', chans)
+
+    return thumb
+
+def image_cache_key(image, extra):
+    """
+    """
+    s, host, path, q, p, f = urlparse(image.url)
+    hash = md5(image.url).hexdigest()
+    name = basename(path)
+    
+    return '-'.join((host, hash, extra, name))

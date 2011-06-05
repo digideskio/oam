@@ -6,9 +6,12 @@ from django.forms import ModelForm
 from main.models import Layer, Image, User, License, Mirror
 from django.db.models import Count
 from django.contrib.gis.geos import Polygon
-from main.helpers import *
 from django.shortcuts import render_to_response, get_object_or_404
 from django.contrib.auth.decorators import login_required
+from django.http import HttpResponse
+from django.core.cache import cache
+
+from StringIO import StringIO
 
 @logged_in_or_basicauth()
 def image_layer(request, image=None, layer=None):
@@ -22,6 +25,10 @@ def image_layer(request, image=None, layer=None):
         return json_response(request, image.to_json())
     else:
         raise Exception("Only POST or DELETE to this resource.")
+
+from main.helpers import \
+    jsonexception, jsonexception, json_response, logged_in_or_basicauth, \
+    image_made_smaller, image_cache_key, image_size_small
 
 @jsonexception
 def layer(request, id=None):
@@ -181,7 +188,17 @@ def image(request, id=None):
         return json_response(request, data)
 
 def home(request):
-    images = Image.objects.order_by("-id")[0:10]
+    """
+    """
+    images = []
+    
+    for img in Image.objects.order_by("-id")[0:30]:
+        width, height = image_size_small(img.width, img.height, 'thumbnail')
+        columns = (width < 240) and 'single' or 'double'
+        
+        image = {'id': img.id, 'image': img, 'thumb_size': [width, height], 'columns': columns}
+        images.append(image)
+    
     return render(request, "home.html", {'images': images})
 
 def license_browse(request, id):
@@ -246,6 +263,7 @@ def layer_browse(request, id):
 
 def image_browse(request, id):
     i = Image.objects.get(pk=id)
+<<<<<<< HEAD
     next = Image.objects.filter(id__gt=id).order_by("id")
     if next.count(): next = next[0]
     else: next = None
@@ -256,3 +274,25 @@ def image_browse(request, id):
 
 def profile(request):
     return HttpResponseRedirect("/")
+=======
+    return render_to_response("image.html", {'image': i})
+
+def image_preview(request, id, size):
+    """
+    """
+    image = Image.objects.get(pk=id)
+
+    key = image_cache_key(image, size)
+    val = cache.get(key)
+    
+    if val is None:
+        preview = image_made_smaller(image, size)
+        buffer = StringIO()
+    
+        preview.save(buffer, 'JPEG')
+        val = buffer.getvalue()
+        
+        cache.set(key, val, 86400)
+    
+    return HttpResponse(val, mimetype='image/jpeg')
+>>>>>>> prettify

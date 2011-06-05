@@ -8,10 +8,23 @@ function start() { createMap("/api/image/?limit=100", document.getElementById("m
 {% block onload %} onload="start();"{% endblock %}
 {% block content %}
 <div style="float: right; width: 200px;">
-<h3>Recently Uploaded Images</h3>
-  <ul>
+  <h3>Recently Uploaded Images</h3>
+  <ul class="image-pile">
   {% for image in images %}
-    <li><a href="/image/{{image.id}}/">{{image.id}}</a></li>
+    <li class="{{image.columns}}">
+        <p>
+            <a href="/image/{{image.id}}/" style="width: {{image.thumb_size.0}}px; height:{{image.thumb_size.1}}px;"><img src="/image/{{image.id}}/thumbnail.jpg" width="{{image.thumb_size.0}}" height="{{image.thumb_size.1}}"></a>
+        </p>
+        <p>
+            <strong><a href="/image/{{image.id}}/">{{image.id}}</a></strong>,
+            <a href="/license/{{image.image.license.id}}/">{{image.image.license.name}}</a>
+            <br>
+            <small>
+                {{image.image.bbox.centroid.1|floatformat:4}}, {{image.image.bbox.centroid.0|floatformat:4}}
+                (<a href="http://www.openstreetmap.org/?lat={{image.image.bbox.centroid.1|floatformat:4}}&amp;lon={{image.image.bbox.centroid.0|floatformat:4}}&amp;zoom=11&amp;layers=M">map</a>)
+            </small>
+        </p>
+    </li>
   {% endfor %}
   </ul>
 </div>
