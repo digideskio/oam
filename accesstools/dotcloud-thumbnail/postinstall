@@ -1,0 +1,19 @@
+if [ ! -f $HOME/env/bin/curl-config ]; then
+    wget -c http://curl.haxx.se/download/curl-7.21.6.tar.gz
+    tar -zvxf curl-7.21.6.tar.gz
+    cd curl-7.21.6
+    ./configure --prefix=$HOME --bindir=$HOME/env/bin
+    make 
+    make install
+    cd ..
+fi
+
+if [ ! -f $HOME/env/bin/gdal-config ]; then
+    wget -c http://download.osgeo.org/gdal/gdal-1.8.0.tar.gz
+    tar -zvxf gdal-1.8.0.tar.gz
+    cd gdal-1.8.0
+    LIBS="`curl-config --libs`" ./configure --prefix=$HOME --bindir=$HOME/env/bin --with-curl --without-libtool --with-python
+    make
+    make install
+    cd ..
+fi    
