@@ -26,7 +26,7 @@ def fetch_image_files(client, bbox, opts):
 
 def run_gdalbuildvrt(files, opts):
     #glob = os.path.join(opts.path, "*.*")
-    os.system("gdalbuildvrt %s %s" % (opts.vrt, " ".join(files)))
+    os.system("gdalbuildvrt -resolution highest %s %s" % (opts.vrt, " ".join(files)))
 
 if __name__ == "__main__":
     parser = oam.option_parser("%prog [options] <west> <south> <east> <north>")
