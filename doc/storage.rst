@@ -36,6 +36,43 @@ consumed. As a result, we have attempted to identify the best option for
 saving space for storage as well as minimizing potential network bandwidth
 while not compromising image quality. 
 
+Archive Image Creation
+----------------------
+
+To create an archive image, it is possible to use GDAL. The basic steps are:
+ 1. If your image has non-data areas, and was converted from a lossy format
+    like SID, first convert the edges to black.
+ 2. Use gdalwarp to embed the mask into the image as an alpha band, and 
+    reproject the image to EPSG:4326
+ 3. Use gdal_translate to convert the warped, alpha image to a 3-band mask
+    image with a YCbCr JPEG mask at 80% quality.
+
+(**Note**: Internal masks, a key component of OAM imagery, require GDAL 1.8+.)
+
+You can use the following: 
+
+::
+
+  export GDAL_TIFF_INTERNAL_MASK=YES
+  nearblack  -co TILED=YES -setmask -near 3 -nb 0 -white -of GTiff -o ./prewarp.tif ./your_image.tif
+  gdalwarp -co TILED=YES -dstalpha  -t_srs EPSG:4326 prewarp.tif warped.tif
+  gdal_translate -co TILED=YES -co JPEG_QUALITY=80 -co COMPRESS=JPEG -co PHOTOMETRIC=YCBCR  -b 1 -b 2 -b 3 -mask 4 warped.tif final.tif 
+    
+If you need to use this imagery in a tool that is not GDAL, and does not 
+correctly support TIFF mask bands, you can convert it back to a normal 4-band
+image with alpha using:
+
+::
+
+  gdal_translate -b 1 -b 2 -b 3 -b mask final.tif myimage.tif
+
+This will flatten the mask back into a 'normal' alpha band.    
+
+Note that, depending on your image, you may need to adjust some parameters
+in the nearblack and gdalwarp commands; once you have an uncompressed image in
+EPSG:4326 with alpha as a fourth band, you should be able to just use the 
+last gdal_translate command to create an OAM image.
+
 Imagery Availability
 ++++++++++++++++++++
 
