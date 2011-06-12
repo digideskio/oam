@@ -37,6 +37,26 @@ image with alpha using:
 
 This will flatten the mask back into a 'normal' alpha band.    
 
+Image Format Support
+++++++++++++++++++++
+
+GDAL supports a wide variety of formats, including both open and proprietary
+formats. Many aerial imagery providers use a proprietary format called MrSID
+to make their imagery available; this format can be added to GDAL on a number
+of platforms, but is generally not available by default on open platforms.
+
+To install MrSID, you can refer to:
+
+ * http://trac.osgeo.org/gdal/wiki/MrSID -- GDAL's webpage on compiling GDAL with MrSID support
+ * http://trac.osgeo.org/ubuntugis/wiki/TutorialMrSid -- UbuntuGIS's page on how to compile MrSID support as a plugin for an already-compiled GDAL.
+ * http://www.kyngchaos.com/software/frameworks -- KyngChaos compiles the MrSID plugin for the GDAL frameworks he makes available.
+
+Once you have MrSID support, you should also be able to read large JPEG2000
+images without problems; the open source (Jasper) JPEG2000 implementation is
+somewhat lacking in dealing with large images.
+
+MrSID and JPEG2000 should provide support for the majority of aerial imagery
+data. 
 
 Tweaking nearblack parameters
 +++++++++++++++++++++++++++++
