@@ -26,6 +26,7 @@ You can use the following:
   nearblack  -co TILED=YES -setmask -nb 0 -of GTiff -o ./prewarp.tif ./your_image.tif
   gdalwarp -co TILED=YES -dstalpha  -t_srs EPSG:4326 prewarp.tif warped.tif
   gdal_translate -co TILED=YES -co JPEG_QUALITY=80 -co COMPRESS=JPEG -co PHOTOMETRIC=YCBCR  -b 1 -b 2 -b 3 -mask 4 warped.tif final.tif 
+  gdaladdo final.tif 2 4 8 16 32 64 128 256
     
 If you need to use this imagery in a tool that is not GDAL, and does not 
 correctly support TIFF mask bands, you can convert it back to a normal 4-band
@@ -37,6 +38,35 @@ image with alpha using:
 
 This will flatten the mask back into a 'normal' alpha band.    
 
+Using EC2
+---------
+
+There is now an EC2 AMI available which has the tools installed to do simple
+image processing. Simply deploy ami-07db196e, and you will have a server
+which has a single script in it: "simple_convert_image.sh". With this 
+in place, you can do a conversion on any file as easily as:
+
+:: 
+  
+  wget http://archive.publiclaboratory.org/portland/2011-3-11-oregon-portland-eastburnside-65th/geotiff/2011-3-11-oregon-portland-eastburnside-65th.tif
+  ./simple_convert_image.sh 2011-3-11-oregon-portland-eastburnside-65th.tif
+
+The end result of this will be a new file::
+
+    -rw-r--r-- 1 ubuntu ubuntu 413M 2011-08-24 07:09 2011-3-11-oregon-portland-eastburnside-65th.tif
+    -rw-r--r-- 1 ubuntu ubuntu  13M 2011-09-16 21:40 2011-3-11-oregon-portland-eastburnside-65th.tif_converted.tif
+
+This runs by default on an EC2 small instance. This instance costs ~8 cents
+per CPU hour in the US/East region. Incoming bandwidth is not charged for 
+in this region, so the large image download to pull an image in will be free;
+you will only pay for the imagery you transfer out, at 12cents/GB (first 
+gigabyte is free).
+
+A simple tutorial on getting started with EC2 is available on many websites;
+I was able to use the instructions in a blog post by Paul Stamatiou: 
+
+http://paulstamatiou.com/how-to-getting-started-with-amazon-ec2
+
 Image Format Support
 ++++++++++++++++++++
 
@@ -47,9 +77,9 @@ of platforms, but is generally not available by default on open platforms.
 
 To install MrSID, you can refer to:
 
- * http://trac.osgeo.org/gdal/wiki/MrSID -- GDAL's webpage on compiling GDAL with MrSID support
- * http://trac.osgeo.org/ubuntugis/wiki/TutorialMrSid -- UbuntuGIS's page on how to compile MrSID support as a plugin for an already-compiled GDAL.
- * http://www.kyngchaos.com/software/frameworks -- KyngChaos compiles the MrSID plugin for the GDAL frameworks he makes available.
+* http://trac.osgeo.org/gdal/wiki/MrSID -- GDAL's webpage on compiling GDAL with MrSID support
+* http://trac.osgeo.org/ubuntugis/wiki/TutorialMrSid -- UbuntuGIS's page on how to compile MrSID support as a plugin for an already-compiled GDAL.
+* http://www.kyngchaos.com/software/frameworks -- KyngChaos compiles the MrSID plugin for the GDAL frameworks he makes available.
 
 Once you have MrSID support, you should also be able to read large JPEG2000
 images without problems; the open source (Jasper) JPEG2000 implementation is
