@@ -1,0 +1,10 @@
+MAP
+LAYER
+  NAME "oam"
+  STATUS ON
+  TILEINDEX "oam.shp"
+  TILEITEM "location"
+  TYPE RASTER
+END
+
+END
